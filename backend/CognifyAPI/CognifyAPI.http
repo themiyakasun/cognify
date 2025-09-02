@@ -1,0 +1,6 @@
+@CognifyAPI_HostAddress = http://localhost:5176
+
+GET {{CognifyAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
