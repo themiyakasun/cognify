@@ -21,7 +21,7 @@ namespace CognifyAPI.Data.Config
                 .HasMaxLength(105);
             builder.Property(r => r.UploadedAt)
                 .IsRequired()
-                .HasDefaultValue(new DateTime())
+                .HasDefaultValueSql("GETDATE()")
                 .ValueGeneratedOnAdd();
             builder.HasOne(r => r.CourseDetails)
                 .WithMany(c => c.Resources)

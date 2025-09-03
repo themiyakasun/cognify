@@ -8,8 +8,8 @@
     }
     public class Admin
     {
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public AdminTypes? AdminType { get; set; }
-        public User UserDetails { get; set; }
+        public ApplicationUser UserDetails { get; set; }
     }
 }

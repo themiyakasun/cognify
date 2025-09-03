@@ -1,6 +1,8 @@
-﻿namespace CognifyAPI.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace CognifyAPI.Models
 {
-    public enum UserRoles
+    public enum UserTypes
     {
         Student,
         Lecturer,
@@ -14,17 +16,13 @@
         Suspended
     }
 
-    public class User
+    public class ApplicationUser: IdentityUser
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
         public string ProfilePictureUrl {  get; set; } = string.Empty;
         public string Bio {  get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime LastLogin {  get; set; } = DateTime.Now;
-        public UserRoles? Role { get; set; } = UserRoles.Student;
+        public UserTypes? UserType { get; set; } = UserTypes.Student;
         public UserStatus? Status { get; set; } = UserStatus.Inactive;
         public Student Student { get; set; }
         public Lecturer Lecturer { get; set; }

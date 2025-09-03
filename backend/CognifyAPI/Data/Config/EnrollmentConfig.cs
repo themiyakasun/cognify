@@ -25,7 +25,7 @@ namespace CognifyAPI.Data.Config
                 .ValueGeneratedOnAddOrUpdate();
             builder.Property(e => e.EntrolledDate)
                 .IsRequired()
-                .HasDefaultValue(new DateTime())
+                .HasDefaultValueSql("GETDATE()")
                 .ValueGeneratedOnAdd();
         }
     }

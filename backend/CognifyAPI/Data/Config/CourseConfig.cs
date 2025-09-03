@@ -21,7 +21,7 @@ namespace CognifyAPI.Data.Config
                 .IsRequired();
             builder.Property(c => c.CreatedAt)
                 .IsRequired()
-                .HasDefaultValue(new DateTime())
+                .HasDefaultValueSql("GETDATE()")
                 .ValueGeneratedOnAdd();
             builder.HasOne(c => c.CategoryDetails)
                 .WithMany(ca => ca.Courses)
