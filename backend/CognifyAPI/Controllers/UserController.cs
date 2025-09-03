@@ -24,7 +24,7 @@ namespace CognifyAPI.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserDto requestDto) 
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto requestDto)
         {
             var userExists = await _userManager.FindByEmailAsync(requestDto.Email);
 
@@ -38,12 +38,12 @@ namespace CognifyAPI.Controllers
                 ProfilePictureUrl = requestDto.ProfilePictureUrl,
                 UserType = requestDto.UserType,
                 Status = requestDto.Status
-                
+
             };
 
             var isCreated = await _userManager.CreateAsync(newUser, requestDto.Password);
 
-            if(isCreated.Succeeded)
+            if (isCreated.Succeeded)
             {
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
@@ -67,7 +67,7 @@ namespace CognifyAPI.Controllers
 
             var isVerified = await _userManager.ConfirmEmailAsync(user, code);
 
-            if (isVerified.Succeeded) 
+            if (isVerified.Succeeded)
             {
                 return Ok(new
                 {
@@ -76,6 +76,32 @@ namespace CognifyAPI.Controllers
             }
 
             return BadRequest(isVerified.Errors);
+        }
+        [HttpPost]
+        [Route("login")]
+        public async Task<ActionResult<LoginResponseDto>> Login(LoginDto requestDto)
+        {
+            if (requestDto.Email == null || requestDto.Password == null) return BadRequest("Enter email and password");
+
+            var existingUser = await _userManager.FindByEmailAsync(requestDto.Email);
+
+            if (existingUser == null) return NotFound("User with this email cannot be found");
+
+            if (existingUser.Status != UserStatus.Active) return Unauthorized("You'r not an active user");
+
+            var isVerified = await _userManager.IsEmailConfirmedAsync(existingUser);
+
+            if (!isVerified) return Unauthorized("Email not verified");
+
+            var token = await _userRepository.LoginAsync(existingUser);
+
+            if (token == null) return BadRequest("Failed to generate token");
+
+            return Ok(new LoginResponseDto
+            {
+                ApplicationUser = existingUser,
+                Token = token
+            });
         }
 
     }

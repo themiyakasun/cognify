@@ -1,6 +1,8 @@
 ﻿using CognifyAPI.Data;
+using CognifyAPI.Dtos.User;
 using CognifyAPI.Interfaces;
 using CognifyAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,10 +14,12 @@ namespace CognifyAPI.Repositories
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
-        public UserRepository(ApplicationDbContext dbContext, IConfiguration configuration) : base(dbContext)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public UserRepository(ApplicationDbContext dbContext, IConfiguration configuration, UserManager<ApplicationUser> userManager) : base(dbContext)
         {
             _dbContext = dbContext;
             _configuration = configuration;
+            _userManager = userManager;
         }
 
         public string GenerateToken(ApplicationUser user)
@@ -38,6 +42,16 @@ namespace CognifyAPI.Repositories
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<string?> LoginAsync(ApplicationUser user)
+        {
+            if (user != null)
+            {
+                var token = GenerateToken(user);
+                return token;
+            }
+            return null;
         }
     }
 }
