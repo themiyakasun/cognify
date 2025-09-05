@@ -5,8 +5,8 @@
         public string UserId { get; set; }
         public string Speciality { get; set; }
         public int ContactNumber { get; set; }
-        public string LinkedinUrl { get; set; }
-        public string WebsiteUrl { get; set; }
+        public string? LinkedinUrl { get; set; }
+        public string? WebsiteUrl { get; set; }
         public int TotalCoursesTaught { get; set; }
         public double RatingAverage { get; set; }
         public ApplicationUser UserDetails { get; set; }

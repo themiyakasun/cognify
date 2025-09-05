@@ -1,4 +1,6 @@
-﻿using CognifyAPI.Dtos.User;
+﻿using CognifyAPI.Dtos.Lecturer;
+using CognifyAPI.Dtos.Student;
+using CognifyAPI.Dtos.User;
 using CognifyAPI.Interfaces;
 using CognifyAPI.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,48 +14,51 @@ namespace CognifyAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserRepository _userRepository;
-        private readonly IEmailRepository _emailRepository;
-        public UserController(UserManager<ApplicationUser> userManager, IUserRepository userRepository, IEmailRepository emailRepository)
+
+        public UserController(IUserRepository userRepository)
         {
-            _userManager = userManager;
             _userRepository = userRepository;
-            _emailRepository = emailRepository;
+
         }
 
         [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserDto requestDto)
+        [Route("register/student")]
+        public async Task<IActionResult> RegisterStudent([FromBody] StudentPostDto requestDto)
         {
-            var userExists = await _userManager.FindByEmailAsync(requestDto.Email);
-
-            if (userExists != null) return Conflict("User already exists with this email");
-
-            var newUser = new ApplicationUser()
+            var registerDto = new RegisterUserDto()
             {
-                Email = requestDto.Email,
-                UserName = requestDto.Name,
-                Bio = requestDto.Bio,
-                ProfilePictureUrl = requestDto.ProfilePictureUrl,
-                UserType = requestDto.UserType,
-                Status = requestDto.Status
-
+                UserData = requestDto.UserData,
+                StudentData = requestDto.StudentData,
             };
 
-            var isCreated = await _userManager.CreateAsync(newUser, requestDto.Password);
+            var result = await _userRepository.RegisterAsync(registerDto);
 
-            if (isCreated.Succeeded)
+            if (result.success) 
             {
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-
-                await _emailRepository.SendEmail(newUser.Email, "Email Verification", code);
-
-                return Ok(new { message = "Email sent successfully" });
+                return Ok(new { result.message });
             }
 
-            return BadRequest(isCreated.Errors);
+            return BadRequest(new { result.message });
+        }
+        [HttpPost]
+        [Route("register/lecturer")]
+        public async Task<IActionResult> RegisterLecturer([FromBody] LecturerRegisterDto requestDto)
+        {
+            var registerDto = new RegisterUserDto()
+            {
+                UserData = requestDto.UserData,
+                LecturerData = requestDto.LecturerData,
+            };
 
+            var result = await _userRepository.RegisterAsync(registerDto);
+
+            if (result.success)
+            {
+                return Ok(new { result.message });
+            }
+
+            return BadRequest(new { result.message });
         }
         [HttpPost]
         [Route("emailVerification")]
@@ -61,48 +66,46 @@ namespace CognifyAPI.Controllers
         {
             if (email == null || code == null) return BadRequest("Invalid Payload");
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var result = await _userRepository.EmailVerificationAsync(email, code);
 
-            if (user == null) return BadRequest("User cannot be found");
+            if (result.ErrorStatus == ErrorStatus.NotFound) return NotFound(result.Message);
 
-            var isVerified = await _userManager.ConfirmEmailAsync(user, code);
+            if (result.ErrorStatus == ErrorStatus.Error) return BadRequest(result.Message);
 
-            if (isVerified.Succeeded)
-            {
-                return Ok(new
-                {
-                    message = "Email verified successfully"
-                });
-            }
-
-            return BadRequest(isVerified.Errors);
+            return Ok(result.Message);
         }
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login(LoginDto requestDto)
+        public async Task<ActionResult<LoginResult>> Login(LoginDto requestDto)
         {
             if (requestDto.Email == null || requestDto.Password == null) return BadRequest("Enter email and password");
 
-            var existingUser = await _userManager.FindByEmailAsync(requestDto.Email);
+            var result = await _userRepository.LoginAsync(requestDto);
 
-            if (existingUser == null) return NotFound("User with this email cannot be found");
+            if (result.LoginStatus == ErrorStatus.NotFound) return NotFound(result.Message);
 
-            if (existingUser.Status != UserStatus.Active) return Unauthorized("You'r not an active user");
+            if (result.LoginStatus == ErrorStatus.Forbidden) return Unauthorized(result.Message);
 
-            var isVerified = await _userManager.IsEmailConfirmedAsync(existingUser);
+            if (result.LoginStatus == ErrorStatus.Unauthorized) return Unauthorized(result.Message);
 
-            if (!isVerified) return Unauthorized("Email not verified");
+            if (result.LoginStatus == ErrorStatus.Error) return BadRequest(result.Message);
 
-            var token = await _userRepository.LoginAsync(existingUser);
+            return Ok(result.LoginResult);
 
-            if (token == null) return BadRequest("Failed to generate token");
-
-            return Ok(new LoginResponseDto
-            {
-                ApplicationUser = existingUser,
-                Token = token
-            });
         }
+        [HttpDelete]
+        [Route("delete/{id}")]
+        public async Task<ActionResult<ApplicationUser>> Delete([FromRoute] string id)
+        {
+            var result = await _userRepository.DeleteAsync(id);
+
+            if (result.ErrorStatus == ErrorStatus.NotFound) return NotFound(result.Message);
+
+            if(result.ApplicationUser == null) return NotFound(result.Message);
+
+            return result.ApplicationUser;
+        }
+
 
     }
 }

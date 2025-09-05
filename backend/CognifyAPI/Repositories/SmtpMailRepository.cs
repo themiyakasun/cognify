@@ -23,6 +23,7 @@ namespace CognifyAPI.Repositories
             };
 
             await client.SendMailAsync(message);
+
         }
     }
 }

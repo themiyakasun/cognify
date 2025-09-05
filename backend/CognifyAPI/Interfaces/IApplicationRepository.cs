@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using CognifyAPI.Dtos.User;
+using System.Linq.Expressions;
 
 namespace CognifyAPI.Interfaces
 {
@@ -9,5 +10,6 @@ namespace CognifyAPI.Interfaces
         Task<List<T>> GetAllAync();
         Task<T?> GetAsync(Expression<Func<T, bool>> filter);
         Task<T> DeleteAsync(T dbRecord);
+
     }
 }

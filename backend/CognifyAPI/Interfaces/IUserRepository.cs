@@ -3,9 +3,13 @@ using CognifyAPI.Models;
 
 namespace CognifyAPI.Interfaces
 {
-    public interface IUserRepository: IApplicationRepository<ApplicationUser>
+    public interface IUserRepository
     {
         string GenerateToken(ApplicationUser user);
-        Task<string?> LoginAsync(ApplicationUser applicationUser);
+        Task<LoginResponseDto> LoginAsync(LoginDto requestDto);
+        Task<(bool success, string message)> RegisterAsync(RegisterUserDto registerUserDto);
+        Task<(ErrorStatus ErrorStatus, string Message)> EmailVerificationAsync(string email, string code);
+        Task<UserDeleteResponseDto> DeleteAsync(string id);
+
     }
 }
