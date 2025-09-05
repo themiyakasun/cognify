@@ -1,4 +1,5 @@
 ﻿using CognifyAPI.Commands.CourseCommands.CreateCourse;
+using CognifyAPI.Commands.CourseCommands.EnrollCourse;
 using CognifyAPI.Dtos.Course;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -21,8 +22,14 @@ namespace CognifyAPI.Controllers
         public async Task<IActionResult> Create(CreateCourseCommand command)
         {
             var course = await _sender.Send(command);
-
             return Ok(course);
+        }
+        [HttpPost]
+        [Route("enroll")]
+        public async Task<IActionResult> Enroll(EnrollCourseCommand command)
+        {
+            var enrollment = await _sender.Send(command);
+            return Ok(enrollment);
         }
     }
 }
