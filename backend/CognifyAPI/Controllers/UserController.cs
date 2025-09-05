@@ -1,4 +1,5 @@
-﻿using CognifyAPI.Dtos.Lecturer;
+﻿using CognifyAPI.Dtos;
+using CognifyAPI.Dtos.Lecturer;
 using CognifyAPI.Dtos.Student;
 using CognifyAPI.Dtos.User;
 using CognifyAPI.Interfaces;

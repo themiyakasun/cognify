@@ -1,4 +1,5 @@
-﻿using CognifyAPI.Dtos.User;
+﻿using CognifyAPI.Dtos;
+using CognifyAPI.Dtos.User;
 using CognifyAPI.Models;
 
 namespace CognifyAPI.Interfaces
